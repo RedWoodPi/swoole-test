@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="msg"></div>
+<input type="text" id="text">
+<input type="submit" value="发送数据" onclick="song()">
+</body>
+<script>
+    var msg = document.getElementById("msg");
+    var wsServer = 'ws://122.112.213.126:9501';
+    var websocket = new WebSocket(wsServer);
+    websocket.onopen = function (evt) {
+        msg.innerHTML = websocket.readyState;
+    };
+
+    function song(){
+        var text = document.getElementById('text').value;
+        document.getElementById('text').value = '';
+        //向服务器发送数据
+        websocket.send(text);
+    }
+    //监听连接关闭
+    //    websocket.onclose = function (evt) {
+    //        console.log("Disconnected");
+    //    };
+
+    //onmessage 监听服务器数据推送
+    websocket.onmessage = function (evt) {
+        msg.innerHTML += evt.data +'<br>';
+//        console.log('Retrieved data from server: ' + evt.data);
+    };
+    //监听连接错误信息
+    //    websocket.onerror = function (evt, e) {
+    //        console.log('Error occured: ' + evt.data);
+    //    };
+
+</script>
+</html>

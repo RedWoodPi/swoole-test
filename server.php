@@ -1,22 +1,24 @@
 <?php
 
 
-$serv = new swoole_server("127.0.0.1", 9501);
+$ws = new swoole_websocket_server("0.0.0.0", 9501);
+$ws->user_c = [];
 
 
-$serv->on('connect', function ($serv, $fd) {
-    echo "Client: Connect.\n";
+$ws->on('open', function ($ws, $request) {
+    $ws->user_c[] = $request->fd;
+    $ws->push($request->fd, "hello, welcome\n");
 });
 
-
-$serv->on('receive', function ($serv, $fd, $from_id, $data) {
-    $serv->send($fd, "Server: ".$data);
+$ws->on('message', function ($ws, $frame) {
+    $msg = 'from'.$frame->fd.":{$frame->data}\n";
+    foreach ($ws->user_c as $v) {
+        $ws->push($v, $msg);
+    }
 });
 
-
-$serv->on('close', function ($serv, $fd) {
-    echo "Client: Close.\n";
+$ws->on('close', function ($ws, $fd){
+   unset($ws->user_c[$fd-1]);
 });
 
-
-$serv->start();
+$ws->start();
